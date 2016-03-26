@@ -29,6 +29,8 @@
 
 #pragma once
 
+#include <stdint.h>
+#include <stdio.h>
 
 /// \brief A Consistent Overhead Byte Stuffing (COBS) Encoder.
 ///
