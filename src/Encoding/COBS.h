@@ -30,9 +30,6 @@
 #pragma once
 
 
-#include "Arduino.h"
-
-
 /// \brief A Consistent Overhead Byte Stuffing (COBS) Encoder.
 ///
 /// Consistent Overhead Byte Stuffing (COBS) is an encoding that removes all 0
