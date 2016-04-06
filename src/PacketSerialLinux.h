@@ -162,7 +162,7 @@ public:
                                                     size, 
                                                     _encodeBuffer);
 
-            _serial->write(_encodeBuffer, numEncoded);
+            _serial->write((char *)_encodeBuffer, numEncoded);
             char marker = (char) PacketMarker;
             _serial->write(&marker, 1);
     }
