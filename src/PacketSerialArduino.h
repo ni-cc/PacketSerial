@@ -51,24 +51,24 @@ public:
     {
         switch(port)
         {
-        #if defined(UBRR1H)
+        //#if defined(UBRR1H)
             case 1:
                 Serial1.begin(baud);
                 _serial = &Serial1;
                 break;
-        #endif
-        #if defined(UBRR2H)
+        //#endif
+        //#if defined(UBRR2H)
             case 2:
                 Serial2.begin(baud);
                 _serial = &Serial2;
                 break;
-        #endif
-        #if defined(UBRR3H)
+        //#endif
+        //#if defined(UBRR3H)
             case 3:
                 Serial3.begin(baud);
                 _serial = &Serial3;
                 break;
-        #endif
+        //#endif
             default:
                 Serial.begin(baud);
                 _serial = &Serial;
