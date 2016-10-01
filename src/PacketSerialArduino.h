@@ -29,7 +29,7 @@
 #include "Encoding/SLIP.h"
 
 
-template<typename EncoderType, uint8_t PacketMarker = 0, size_t BufferSize = 256>
+template<typename EncoderType, uint8_t PacketMarker = 0, size_t BufferSize = 1024>
 class PacketSerial_
 {
 public:

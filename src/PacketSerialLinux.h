@@ -125,7 +125,14 @@ public:
             uint8_t data = (uint8_t) charin;
             if (data == PacketMarker)
             {
-                if (_onPacketFunction) 
+                //TODO: verify whether or not the ARDUINO is falling into a mode
+                //where it spams zero-length / NULL packets.
+
+                printf("Data %d buf len %d\n", data, _recieveBufferIndex);
+                //TODO: We're stuck in this loop. in_avail() is always true
+                //and get() keeps returning the same bad char. What gives?
+
+                if (_recieveBufferIndex > 0 && _onPacketFunction) 
                 {
                     uint8_t _decodeBuffer[_recieveBufferIndex];
 
@@ -147,6 +154,7 @@ public:
                 else
                 {
                     // Error, buffer overflow if we write.
+                    printf("Overflowing in PacketSerialLinux\n");
                 }
             }
         }
@@ -156,15 +164,15 @@ public:
     {
         if(_serial == 0 || buffer == 0 || size == 0) return;
 
-            uint8_t _encodeBuffer[EncoderType::getEncodedBufferSize(size)];
+        uint8_t _encodeBuffer[EncoderType::getEncodedBufferSize(size)];
 
-            size_t numEncoded = EncoderType::encode(buffer, 
-                                                    size, 
-                                                    _encodeBuffer);
+        size_t numEncoded = EncoderType::encode(buffer, 
+                                                size, 
+                                                _encodeBuffer);
 
-            _serial->write((char *)_encodeBuffer, numEncoded);
-            char marker = (char) PacketMarker;
-            _serial->write(&marker, 1);
+        _serial->write((char *)_encodeBuffer, numEncoded);
+        char marker = (char) PacketMarker;
+        _serial->write(&marker, 1);
     }
     
     void setPacketHandler(PacketHandlerFunction onPacketFunction, void * extra)
