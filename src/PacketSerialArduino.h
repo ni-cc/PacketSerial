@@ -92,12 +92,9 @@ public:
             {
                 if (_onPacketFunction)
                 {
-                    uint8_t _decodeBuffer[_recieveBufferIndex];
-
                     size_t numDecoded = EncoderType::decode(_recieveBuffer,
                                                             _recieveBufferIndex,
                                                             _decodeBuffer);
-
                     _onPacketFunction(_decodeBuffer, numDecoded, _extraArg);
                 }
 
@@ -112,6 +109,7 @@ public:
                 else
                 {
                     // Error, buffer overflow if we write.
+                    _serial->write("overflow\n");
                 }
             }
         }
@@ -120,8 +118,6 @@ public:
     void send(const uint8_t* buffer, size_t size)
     {
         if(_serial == 0 || buffer == 0 || size == 0) return;
-
-        uint8_t _encodeBuffer[EncoderType::getEncodedBufferSize(size)];
 
         size_t numEncoded = EncoderType::encode(buffer,
                                                 size,
@@ -144,6 +140,8 @@ private:
 
     uint8_t _recieveBuffer[BufferSize];
     size_t _recieveBufferIndex;
+    uint8_t _decodeBuffer[BufferSize];
+    uint8_t _encodeBuffer[BufferSize+500]; // TODO(gizatt) dangerous! may need to be bigger...
 
     Stream* _serial;
 

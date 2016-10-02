@@ -33,9 +33,12 @@
 
 using namespace LibSerial ;
 
-template<typename EncoderType, uint8_t PacketMarker = 0, int BufferSize = 256>
+template<typename EncoderType, uint8_t PacketMarker = 0, int BufferSize = 1024>
 class PacketSerial_
 {
+private:
+    uint8_t _decodeBuffer[BufferSize];
+
 public:
     typedef void (*PacketHandlerFunction)(const uint8_t* buffer, size_t size, void * extra);
 
@@ -118,27 +121,28 @@ public:
     {
         if (_serial == 0) return;
 
-        while (_serial->rdbuf()->in_avail() > 0)
-        {
+        while (_serial->good() && _serial->rdbuf()->in_avail() > 0){
             char charin;
             _serial->get(charin);
+            if (!_serial->good()){
+                printf("Serial fail during getchar.\n");
+                _serial->clear();
+                continue;
+            }
             uint8_t data = (uint8_t) charin;
             if (data == PacketMarker)
             {
-                //TODO: verify whether or not the ARDUINO is falling into a mode
-                //where it spams zero-length / NULL packets.
-
-                printf("Data %d buf len %d\n", data, _recieveBufferIndex);
-                //TODO: We're stuck in this loop. in_avail() is always true
-                //and get() keeps returning the same bad char. What gives?
-
                 if (_recieveBufferIndex > 0 && _onPacketFunction) 
                 {
-                    uint8_t _decodeBuffer[_recieveBufferIndex];
 
                     size_t numDecoded = EncoderType::decode(_recieveBuffer, 
                                                             _recieveBufferIndex, 
                                                             _decodeBuffer);
+
+                    for (int i=0; i < numDecoded; i++){
+                        printf("%c", _decodeBuffer[i]);
+                    }
+                    printf("\n");
 
                     _onPacketFunction(_decodeBuffer, numDecoded, _extraArg);
                 }
@@ -154,7 +158,6 @@ public:
                 else
                 {
                     // Error, buffer overflow if we write.
-                    printf("Overflowing in PacketSerialLinux\n");
                 }
             }
         }
@@ -173,6 +176,12 @@ public:
         _serial->write((char *)_encodeBuffer, numEncoded);
         char marker = (char) PacketMarker;
         _serial->write(&marker, 1);
+        _serial->flush();
+
+        if (!_serial->good()){
+            printf("Serial failure during send.\n");
+            _serial->clear();
+        }
     }
     
     void setPacketHandler(PacketHandlerFunction onPacketFunction, void * extra)
