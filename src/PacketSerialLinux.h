@@ -70,8 +70,19 @@ public:
         }
         //
         // Set the baud rate of the serial port.
-        //
-        _serial->SetBaudRate( SerialStreamBuf::BAUD_115200 ) ;
+        SerialStreamBuf::BaudRateEnum baud_enum;
+        if (baud == 115200){
+            baud_enum = SerialStreamBuf::BAUD_115200;
+        }
+        else if (baud == 230400){
+            baud_enum = SerialStreamBuf::BAUD_230400;
+        }
+        else{
+            std::cerr << "Unsupported baud rate of " << baud << " in PacketSerialLinux.h" << std::endl;
+            exit(1);
+        }
+
+        _serial->SetBaudRate( baud_enum ) ;
         if ( ! _serial->good() ) 
         {
             std::cerr << "Error: Could not set the baud rate." << std::endl ;
@@ -138,11 +149,6 @@ public:
                     size_t numDecoded = EncoderType::decode(_recieveBuffer, 
                                                             _recieveBufferIndex, 
                                                             _decodeBuffer);
-
-                    for (int i=0; i < numDecoded; i++){
-                        printf("%c", _decodeBuffer[i]);
-                    }
-                    printf("\n");
 
                     _onPacketFunction(_decodeBuffer, numDecoded, _extraArg);
                 }
